@@ -1,4 +1,4 @@
-# nix-skills
+# agent-skills-nix
 
 The agent skills behind [nixfiles](https://github.com/Shochraos/nixfiles), packaged as Nix derivations and kept fresh by a weekly auto-updater — plus one runtime package: a fully declarative Scrapling MCP server.
 
@@ -37,8 +37,8 @@ Add the input and install the payload directories as oh-my-pi `skills.customDire
 
 ```nix
 {
-  inputs.nix-skills = {
-    url = "github:Shochraos/nix-skills";
+  inputs.agent-skills-nix = {
+    url = "github:Shochraos/agent-skills-nix";
     inputs.nixpkgs.follows = "nixpkgs";
   };
 }
@@ -48,9 +48,9 @@ Add the input and install the payload directories as oh-my-pi `skills.customDire
 { inputs, pkgs, ... }:
 {
   skills.customDirectories = [
-    "${inputs.nix-skills.packages.${pkgs.stdenv.hostPlatform.system}.superpowers-skills}"
-    "${inputs.nix-skills.packages.${pkgs.stdenv.hostPlatform.system}.vendored-skills}"
-    "${inputs.nix-skills.packages.${pkgs.stdenv.hostPlatform.system}.managed-skills}"
+    "${inputs.agent-skills-nix.packages.${pkgs.stdenv.hostPlatform.system}.superpowers-skills}"
+    "${inputs.agent-skills-nix.packages.${pkgs.stdenv.hostPlatform.system}.vendored-skills}"
+    "${inputs.agent-skills-nix.packages.${pkgs.stdenv.hostPlatform.system}.managed-skills}"
   ];
 }
 ```
@@ -62,7 +62,7 @@ home.file.".omp/agent/mcp.json".source = (pkgs.formats.json { }).generate "mcp.j
   "$schema" = "https://raw.githubusercontent.com/can1357/oh-my-pi/main/packages/coding-agent/src/config/mcp-schema.json";
   mcpServers.ScraplingServer = {
     type = "stdio";
-    command = "${inputs.nix-skills.packages.${pkgs.stdenv.hostPlatform.system}.scrapling-runtime}/bin/scrapling-mcp";
+    command = "${inputs.agent-skills-nix.packages.${pkgs.stdenv.hostPlatform.system}.scrapling-runtime}/bin/scrapling-mcp";
     timeout = 120000;
   };
 };

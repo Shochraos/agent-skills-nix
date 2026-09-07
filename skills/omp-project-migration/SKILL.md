@@ -34,7 +34,8 @@ Verified both directions 2026-08-28 (omp 18.0.6).
 
 ## 3. Sessions
 `~/.omp/agent/sessions/<encoded-cwd>/` where encoded-cwd is the absolute path
-with `/` -> `-` (spaces preserved). Rename the dir to the new encoding.
+with `/` -> `-` MINUS the `/home/<user>` prefix (e.g.
+`/home/shochraos/Repositories/nix/agent-skills-nix` -> `-Repositories-nix-agent-skills-nix`).
 After the move confirm old sessions appear in `omp --resume` picker.
 
 ## 4. Prompt history
@@ -53,6 +54,25 @@ stage1 system, safe to update or ignore.
 From the new path, print-mode probe asking the agent to call `recall` on a query
 with known bank hits and quote raw ids. Model-narrated probes of injected
 blocks are unreliable; tool-result output is machine-verifiable.
+
+## 6. TTL hazard — the verification probe can wipe a stale bank
+mnemopi's compiled defaults (`workingMemoryLimit: 1000`, `workingMemoryTtlHours: 24`,
+read from the omp binary) make every bank a 24-hour rolling window: on session
+activity, rows older than the TTL are pruned and a cascade (`source_msg_id` /
+`source_memory_id`) deletes their derived facts, memoria_facts, annotations and
+embeddings. A bank idle longer than the TTL is therefore wiped BY THE PROBE
+ITSELF (happened 2026-09-04: 87 rows lost). Before probing, check the bank's
+newest row (`SELECT MAX(timestamp) FROM working_memory`): if it is older than
+the TTL, skip the probe until `mnemopi.workingMemoryTtlHours` and
+`mnemopi.workingMemoryLimit` are raised in the omp config, or accept the loss
+knowingly.
+
+Recovery if pruned: retain items survive verbatim in the session transcripts
+(`toolResult` records carrying `details.xdev.args.items`), fact rows often
+survive in freed SQLite pages (carve with the old bank name as anchor), and the
+probe's own transcript echoes its recall result with ids. After any direct
+INSERT, dedupe `fts_working`/`fts_working_content` to one row per id and run
+`INSERT INTO fts_working(fts_working) VALUES('rebuild')`.
 
 ## Unaffected
 memory_embeddings (id-keyed), session_titles (uuid-keyed), blobs/, models.db,

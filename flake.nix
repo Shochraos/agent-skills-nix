@@ -79,7 +79,7 @@
         // {
           scrapling-runtime = pkgs.callPackage ./pkgs/scrapling-runtime/package.nix { };
           default = pkgs.symlinkJoin {
-            name = "nix-skills";
+            name = "agent-skills-nix";
             paths = nixpkgs.lib.attrValues payloads;
           };
         }
