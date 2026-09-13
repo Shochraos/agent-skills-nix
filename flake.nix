@@ -74,8 +74,16 @@
               src = ./skills;
             };
           };
+          managedPerSkill = nixpkgs.lib.filterAttrs (_: nixpkgs.lib.isDerivation) (
+            pkgs.callPackage ./pkgs/managed-skills/per-skill.nix {
+              src = ./skills;
+            }
+          );
         in
         payloads
+        // (nixpkgs.lib.mapAttrs' (
+          name: drv: nixpkgs.lib.nameValuePair "managed-${name}" drv
+        ) managedPerSkill)
         // {
           scrapling-runtime = pkgs.callPackage ./pkgs/scrapling-runtime/package.nix { };
           default = pkgs.symlinkJoin {
