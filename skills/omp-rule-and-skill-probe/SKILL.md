@@ -35,7 +35,7 @@ Ask for **short, distinctive verbatim substrings** with at least one invented ne
 
 > Bare numbered list, no prose. YES if the token appears verbatim in your injected always-apply rules, NO otherwise: (1) `<short phrase>` (2) `<short phrase>` (3) `glorptastic sediment`
 
-For skills: `Count the entries in your <skills> list, print the count, and print YES if <name> is one of them else NO`, plus `Read skill://<name> and print its description frontmatter value verbatim`.
+For skills: `Count the entries in your <skills> list, print the count, and print YES if <name> is one of them else NO`, plus `Read skill://<name> and print its description frontmatter value verbatim`. To test one skills *directory* in isolation, take the built `nix-config.yml`, replace the whole `customDirectories` list with that single path, and ask for three YES/NO tokens: the target (expect YES), a sibling skill that the same payload would deliver (expect NO — isolation control), and an invented name (expect NO — sensitivity control). Both controls are mandatory: a lone YES proves nothing.
 
 ## Traps that produce wrong answers
 
@@ -44,6 +44,7 @@ For skills: `Count the entries in your <skills> list, print the count, and print
 - **`omp read` with a skill URL does not run discovery** — it always reports "Available: none".
 - **`--no-tools` omits the `<skills>` block entirely**, so it gives a false negative for discovery.
 - **The session jsonl does not store the system prompt**, so you cannot grep it for ground truth; rely on the file on disk plus short-substring probes.
+- **`omp -p` driven from a script or subprocess hangs forever unless its stdin is closed.** An inherited open stdin (an eval kernel's pipe, a parent that never closes it) makes print mode block before it ever reaches the model — no output, no session file, nothing to diagnose. Pass `stdin=subprocess.DEVNULL` (bash: `</dev/null`). Measured 2026-09-13 on 18.1.18: two 5-minute timeouts, one with a scratch agent dir and one with the live one, both green the moment stdin was closed.
 - **Managed skills are absent** from a scratch agent dir — a useful confirmation that the probe is isolated, and it shifts the expected skill count.
 
 ## Complementary non-probe evidence
