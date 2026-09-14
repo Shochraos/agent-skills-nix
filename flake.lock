@@ -3,11 +3,11 @@
     "anthropics-skills": {
       "flake": false,
       "locked": {
-        "lastModified": 1788453433,
-        "narHash": "sha256-sjgPv9tZZVTXPxZWaCOc7JwFceNn3C1ghy8mSHqgqB8=",
+        "lastModified": 1789069448,
+        "narHash": "sha256-tI4bTTBfI1ylltklGyiyA7pLoKXEWtrT6lrmwrpLbCw=",
         "owner": "anthropics",
         "repo": "skills",
-        "rev": "41bbe19d1a1a7eaab5e7bb9050a417e5c6cffc8f",
+        "rev": "34040c9c568585f6929bedeaad110ad08f079624",
         "type": "github"
       },
       "original": {
@@ -19,11 +19,11 @@
     "nixos-skill": {
       "flake": false,
       "locked": {
-        "lastModified": 1788762702,
-        "narHash": "sha256-snTY1RtnHWRHQV/ldqjx0aOPYEdXiGaTsGLGv7WKpCA=",
+        "lastModified": 1789367503,
+        "narHash": "sha256-qfPgAKfYo2r+KCANlMwCOTAIRBwKIDtABKwtim4DeUc=",
         "owner": "marceloeatworld",
         "repo": "nixos-ai-skill",
-        "rev": "2f1fa410f175c4ff8d06367e0ae0f5dd0d80f728",
+        "rev": "a3180357e25edd241911f60ffba50d4b00eacc9d",
         "type": "github"
       },
       "original": {
@@ -94,11 +94,11 @@
     "vercel-skills": {
       "flake": false,
       "locked": {
-        "lastModified": 1788734871,
-        "narHash": "sha256-0BmVByaPFacM4Tncrs8Kq56MqDyDWrKCJmQhqEolTOs=",
+        "lastModified": 1789167344,
+        "narHash": "sha256-zvzH1pMb3zTNE5CewisUohitzR6Nh/DLyjqR1cIQ0og=",
         "owner": "vercel-labs",
         "repo": "skills",
-        "rev": "1682051d48c34f5eb135e6475c1a965dce05e820",
+        "rev": "d667282815248da03a08a18272b5d2eef9caf77c",
         "type": "github"
       },
       "original": {
@@ -110,11 +110,11 @@
     "wshobson-agents": {
       "flake": false,
       "locked": {
-        "lastModified": 1788302183,
-        "narHash": "sha256-sL/1lVCj20Z7WItLZEbafGuw8ifsou0bnPKR9Z77KDM=",
+        "lastModified": 1789310633,
+        "narHash": "sha256-jJsolFsGXiAxpgvyEAxY8CvO9PDCjcJP1lXDHp8bLFw=",
         "owner": "wshobson",
         "repo": "agents",
-        "rev": "a30778f8c4e6b0a87567941b7cca4f534bf642b6",
+        "rev": "4236bb91f8395b0435f1d8b8baf9e8e4c69a8620",
         "type": "github"
       },
       "original": {
