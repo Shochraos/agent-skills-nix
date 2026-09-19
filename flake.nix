@@ -23,10 +23,12 @@
       url = "github:wshobson/agents";
       flake = false;
     };
+
     qt-agent-skills = {
       url = "github:TheQtCompanyRnD/agent-skills";
       flake = false;
     };
+
     anthropics-skills = {
       url = "github:anthropics/skills";
       flake = false;
@@ -51,17 +53,35 @@
       ];
       forAllSystems = nixpkgs.lib.genAttrs systems;
       pkgsFor = forAllSystems (system: import nixpkgs { inherit system; });
-    in
-    {
-      packages = forAllSystems (
+
+      perSystem = forAllSystems (
         system:
         let
           pkgs = pkgsFor.${system};
+          lib = nixpkgs.lib;
+
+          # Each payload file returns `{ payload; skillNames; }`; `prefix` names its
+          # per-skill packages, and `skillNames` comes from the same data the
+          # payload's build script copies, so the two cannot drift apart.
+          #
+          # `callPackage` wraps a non-derivation result in `makeOverridable`, which
+          # tags on `override`/`overrideDerivation`; strip them so each record is
+          # exactly `{ prefix; payload; skillNames; }` for the consumers below.
+          payload =
+            prefix: file: args:
+            {
+              inherit prefix;
+            }
+            // lib.removeAttrs (pkgs.callPackage file args) [
+              "override"
+              "overrideDerivation"
+            ];
+
           payloads = {
-            superpowers-skills = pkgs.callPackage ./pkgs/superpowers-skills/package.nix {
+            superpowers-skills = payload "superpowers" ./pkgs/superpowers-skills/package.nix {
               src = superpowers;
             };
-            vendored-skills = pkgs.callPackage ./pkgs/vendored-skills/package.nix {
+            vendored-skills = payload "vendored" ./pkgs/vendored-skills/package.nix {
               inherit (inputs)
                 nixos-skill
                 vercel-skills
@@ -70,30 +90,56 @@
                 anthropics-skills
                 ;
             };
-            managed-skills = pkgs.callPackage ./pkgs/managed-skills/package.nix {
+            managed-skills = payload "managed" ./pkgs/managed-skills/package.nix {
               src = ./skills;
             };
           };
-          managedPerSkill = nixpkgs.lib.filterAttrs (_: nixpkgs.lib.isDerivation) (
-            pkgs.callPackage ./pkgs/managed-skills/per-skill.nix {
-              src = ./skills;
+
+          payloadPackages = lib.mapAttrs (_: payload: payload.payload) payloads;
+          skillPackages = (pkgs.callPackage ./pkgs/lib/slices.nix { }) payloads;
+          mkSkillset = (pkgs.callPackage ./pkgs/lib/mk-skillset.nix { }) skillPackages;
+
+          collisions = lib.intersectLists (lib.attrNames skillPackages) (lib.attrNames payloadPackages);
+          expectedSkills = lib.foldl' (count: payload: count + builtins.length payload.skillNames) 0 (
+            lib.attrValues payloads
+          );
+          problems =
+            lib.optionals (collisions != [ ]) [
+              "per-skill packages collide with payload packages: ${toString collisions}"
+            ]
+            ++ lib.optionals (builtins.length (lib.attrNames skillPackages) != expectedSkills) [
+              "generated ${toString (builtins.length (lib.attrNames skillPackages))} of ${toString expectedSkills} per-skill packages"
+            ];
+
+          packages = lib.throwIf (problems != [ ]) "agent-skills-nix: ${lib.concatStringsSep "; " problems}" (
+            payloadPackages
+            // skillPackages
+            // {
+              scrapling-runtime = pkgs.callPackage ./pkgs/scrapling-runtime/package.nix { };
             }
           );
         in
-        payloads
-        // (nixpkgs.lib.mapAttrs' (
-          name: drv: nixpkgs.lib.nameValuePair "managed-${name}" drv
-        ) managedPerSkill)
-        // {
-          scrapling-runtime = pkgs.callPackage ./pkgs/scrapling-runtime/package.nix { };
-          default = pkgs.symlinkJoin {
-            name = "agent-skills-nix";
-            paths = nixpkgs.lib.attrValues payloads;
+        rec {
+          inherit packages mkSkillset;
+
+          checks = packages // {
+            skillset-smoke = mkSkillset [
+              "superpowers-brainstorming"
+              "vendored-nixos"
+              "managed-cloudflare-bypass"
+            ];
           };
         }
       );
+    in
+    {
+      packages = forAllSystems (system: perSystem.${system}.packages);
 
-      checks = forAllSystems (system: self.packages.${system});
+      checks = forAllSystems (system: perSystem.${system}.checks);
+
+      lib = forAllSystems (system: {
+        inherit (perSystem.${system}) mkSkillset;
+      });
 
       formatter = forAllSystems (system: pkgsFor.${system}.nixfmt-tree);
 

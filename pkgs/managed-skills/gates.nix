@@ -1,5 +1,4 @@
-# Gate snippets shared by the aggregate payload (./package.nix) and the
-# per-skill packages (./per-skill.nix).
+# Gate snippets for the managed payload's aggregate derivation (./package.nix).
 { lib }:
 let
   noTrailingNewline = lib.removeSuffix "\n";

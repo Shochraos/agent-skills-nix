@@ -12,6 +12,8 @@ let
     "using-superpowers"
   ];
 
+  allSkills = import ../lib/dir-skills.nix { inherit lib; } "${src}/skills";
+
   rewrites = {
     "brainstorming/SKILL.md" = [
       {
@@ -153,26 +155,31 @@ let
     ) rewrites
   );
 in
-runCommandLocal "superpowers-skills-${version}"
-  {
-    meta = {
-      description = "Superpowers agent skills, with the git-integration steps removed";
-      homepage = "https://github.com/obra/superpowers";
-      license = lib.licenses.mit;
-      platforms = lib.platforms.all;
-    };
-  }
-  ''
-    cp -r ${src}/skills $out
-    chmod -R u+w $out
-    rm -rf ${lib.concatMapStringsSep " " (name: "$out/${name}") droppedSkills}
+{
+  payload =
+    runCommandLocal "superpowers-skills-${version}"
+      {
+        meta = {
+          description = "Superpowers agent skills, with the git-integration steps removed";
+          homepage = "https://github.com/obra/superpowers";
+          license = lib.licenses.mit;
+          platforms = lib.platforms.all;
+        };
+      }
+      ''
+        cp -r ${src}/skills $out
+        chmod -R u+w $out
+        rm -rf ${lib.concatMapStringsSep " " (name: "$out/${name}") droppedSkills}
 
-    ${applyRewrites}
+        ${applyRewrites}
 
-    for pattern in ${lib.escapeShellArgs banned}; do
-      if grep -rnF --include='*.md' -- "$pattern" $out; then
-        echo "superpowers-skills: upstream reintroduced '$pattern' at the sites above" >&2
-        exit 1
-      fi
-    done
-  ''
+        for pattern in ${lib.escapeShellArgs banned}; do
+          if grep -rnF --include='*.md' -- "$pattern" $out; then
+            echo "superpowers-skills: upstream reintroduced '$pattern' at the sites above" >&2
+            exit 1
+          fi
+        done
+      '';
+
+  skillNames = builtins.attrNames (builtins.removeAttrs allSkills droppedSkills);
+}

@@ -14,17 +14,40 @@ let
     hash = "sha256-qT+RYb7zJOOhVQ/HnU8BtmCj+36txEVWd9ms5NopZaw=";
   };
 
-  droppedNixosFiles = [
-    ".github"
-    ".gitignore"
-    "README.md"
-    "install.sh"
-    "scripts"
-    "references/release-process.md"
-  ];
+  dirSkills = import ../lib/dir-skills.nix { inherit lib; };
 
-  rewrites = {
-    "nixos/SKILL.md" = [
+  # Every skill this payload ships, and where it comes from. The build script and
+  # the per-skill package list are both generated from this attrset, so a skill
+  # cannot be copied without being selectable, or selectable without being copied.
+  copies = {
+    nixos = nixos-skill;
+    find-skills = "${vercel-skills}/skills/find-skills";
+    qt-qml = "${qt-agent-skills}/skills/qt-qml";
+    qt-qml-review = "${qt-agent-skills}/skills/qt-qml-review";
+    qt-cmake-project = "${qt-agent-skills}/skills/qt-cmake-project";
+    memory-safety-patterns = "${wshobson-agents}/plugins/systems-programming/skills/memory-safety-patterns";
+    github-actions-templates = "${wshobson-agents}/plugins/cicd-automation/skills/github-actions-templates";
+    avoid-ai-writing = "${wshobson-agents}/plugins/avoid-ai-writing/skills/avoid-ai-writing";
+    doc-coauthoring = "${anthropics-skills}/skills/doc-coauthoring";
+    create-readme = {
+      file = createReadmeSkill;
+    };
+  }
+  // dirSkills "${wshobson-agents}/plugins/python-development/skills"
+  // dirSkills "${wshobson-agents}/plugins/shell-scripting/skills";
+
+  # Per-skill edits, applied after the copies: `drop` removes files that exist only
+  # to serve the upstream repository, `rewrites` keys are paths inside the skill.
+  edits = {
+    nixos.drop = [
+      ".github"
+      ".gitignore"
+      "README.md"
+      "install.sh"
+      "scripts"
+      "references/release-process.md"
+    ];
+    nixos.rewrites."SKILL.md" = [
       {
         from = ''
           ### Release Process
@@ -37,8 +60,10 @@ let
         to = "";
       }
     ];
-
-    "uv-package-manager/references/advanced-patterns.md" = [
+    qt-qml.drop = [ "README.md" ];
+    qt-qml-review.drop = [ "README.md" ];
+    qt-cmake-project.drop = [ "README.md" ];
+    uv-package-manager.rewrites."references/advanced-patterns.md" = [
       {
         from = ''
 
@@ -48,8 +73,7 @@ let
         to = "";
       }
     ];
-
-    "find-skills/SKILL.md" = [
+    find-skills.rewrites."SKILL.md" = [
       {
         from = ''
           - `npx skills add <package>` - Install a skill from GitHub or other sources
@@ -102,14 +126,33 @@ let
     ];
   };
 
-  applyRewrites = lib.concatLines (
+  # A single-file skill carries `file`; everything else is a directory path.
+  # (`lib.isAttrs` alone is true for derivations too, so `file` is the test.)
+  copyLine =
+    name: source:
+    if lib.isAttrs source && source ? file then
+      "install -Dm644 ${source.file} $out/${name}/SKILL.md"
+    else
+      "cp -r ${source} $out/${name}";
+
+  rewriteLines =
+    name: file: substitutions:
+    lib.concatStringsSep " \\\n" (
+      [ "substituteInPlace $out/${name}/${file}" ]
+      ++ map (s: "  --replace-fail ${lib.escapeShellArg s.from} ${lib.escapeShellArg s.to}") substitutions
+    );
+
+  editLines = lib.concatStrings (
     lib.mapAttrsToList (
-      file: subs:
-      lib.concatStringsSep " \\\n" (
-        [ "substituteInPlace $out/${file}" ]
-        ++ map (s: "  --replace-fail ${lib.escapeShellArg s.from} ${lib.escapeShellArg s.to}") subs
+      name: edit:
+      lib.optionalString (edit ? drop)
+        "rm -rf ${lib.concatMapStringsSep " " (file: "$out/${name}/${file}") edit.drop}\n"
+      + lib.concatStrings (
+        lib.mapAttrsToList (file: substitutions: "${rewriteLines name file substitutions}\n") (
+          edit.rewrites or { }
+        )
       )
-    ) rewrites
+    ) edits
   );
 
   bannedEverywhere = [
@@ -136,54 +179,45 @@ let
     done
   '';
 in
-runCommandLocal "vendored-skills"
-  {
-    meta = {
-      description = "Third-party agent skills, with sibling paths normalised to skill:// URLs and imperative install steps removed";
-      platforms = lib.platforms.all;
-    };
-  }
-  ''
-    mkdir -p $out
+{
+  payload =
+    runCommandLocal "vendored-skills"
+      {
+        meta = {
+          description = "Third-party agent skills, with sibling paths normalised to skill:// URLs and imperative install steps removed";
+          platforms = lib.platforms.all;
+        };
+      }
+      ''
+        mkdir -p $out
 
-    cp -r ${nixos-skill} $out/nixos
-    cp -r ${vercel-skills}/skills/find-skills $out/find-skills
-    cp -r ${wshobson-agents}/plugins/python-development/skills/. $out/
-    cp -r ${qt-agent-skills}/skills/qt-qml $out/qt-qml
-    cp -r ${qt-agent-skills}/skills/qt-qml-review $out/qt-qml-review
-    cp -r ${qt-agent-skills}/skills/qt-cmake-project $out/qt-cmake-project
-    cp -r ${wshobson-agents}/plugins/shell-scripting/skills/. $out/
-    cp -r ${wshobson-agents}/plugins/systems-programming/skills/memory-safety-patterns $out/memory-safety-patterns
-    cp -r ${wshobson-agents}/plugins/cicd-automation/skills/github-actions-templates $out/github-actions-templates
-    cp -r ${wshobson-agents}/plugins/avoid-ai-writing/skills/avoid-ai-writing $out/avoid-ai-writing
-    cp -r ${anthropics-skills}/skills/doc-coauthoring $out/doc-coauthoring
-    install -Dm644 ${createReadmeSkill} $out/create-readme/SKILL.md
+        ${lib.concatStringsSep "\n" (lib.mapAttrsToList copyLine copies)}
 
-    chmod -R u+w $out
+        chmod -R u+w $out
 
-    rm -rf ${lib.concatMapStringsSep " " (f: "$out/nixos/${f}") droppedNixosFiles}
-    rm -f $out/qt-qml/README.md $out/qt-qml-review/README.md $out/qt-cmake-project/README.md
-    ${applyRewrites}
+        ${editLines}
+        for dir in $out/*/; do
+          name=$(basename "$dir")
+          [ -f "$dir/SKILL.md" ] || continue
+          find "$dir" -name '*.md' -exec sed -i -E \
+            -e "s#\]\(\.\./([A-Za-z0-9_-]+)/SKILL\.md\)#](skill://\1)#g" \
+            -e "s#(\.\./)+references/#skill://$name/references/#g" \
+            -e "s#(^|[^/])references/#\1skill://$name/references/#g" \
+            {} +
+        done
 
-    for dir in $out/*/; do
-      name=$(basename "$dir")
-      [ -f "$dir/SKILL.md" ] || continue
-      find "$dir" -name '*.md' -exec sed -i -E \
-        -e "s#\]\(\.\./([A-Za-z0-9_-]+)/SKILL\.md\)#](skill://\1)#g" \
-        -e "s#(\.\./)+references/#skill://$name/references/#g" \
-        -e "s#(^|[^/])references/#\1skill://$name/references/#g" \
-        {} +
-    done
+        ${gate "*.md" bannedEverywhere}
+        ${gate "SKILL.md" bannedInSkillFiles}
 
-    ${gate "*.md" bannedEverywhere}
-    ${gate "SKILL.md" bannedInSkillFiles}
+        unresolved=0
+        for target in $(grep -rhoE 'skill://[A-Za-z0-9_./-]+' --include='*.md' $out | sort -u); do
+          [ -e "$out/''${target#skill://}" ] && continue
+          echo "vendored-skills: '$target' resolves to nothing:" >&2
+          grep -rnF --include='*.md' -- "$target" $out >&2
+          unresolved=1
+        done
+        [ "$unresolved" -eq 0 ]
+      '';
 
-    unresolved=0
-    for target in $(grep -rhoE 'skill://[A-Za-z0-9_./-]+' --include='*.md' $out | sort -u); do
-      [ -e "$out/''${target#skill://}" ] && continue
-      echo "vendored-skills: '$target' resolves to nothing:" >&2
-      grep -rnF --include='*.md' -- "$target" $out >&2
-      unresolved=1
-    done
-    [ "$unresolved" -eq 0 ]
-  ''
+  skillNames = builtins.attrNames copies;
+}
