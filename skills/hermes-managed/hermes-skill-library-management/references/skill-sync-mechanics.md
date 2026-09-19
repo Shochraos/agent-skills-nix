@@ -62,3 +62,17 @@ opted out), `shadowed_by_external`, `skipped_opt_out`, `suppressed`, `cleaned`.
 Then confirm on disk: `find "$HERMES_HOME/skills" -mindepth 1 -name SKILL.md | wc -l`, and
 re-run `skills_list` to compare registry counts. A category `DESCRIPTION.md` and a baselined
 `.bundled_manifest` are expected by-products of a sync that copied no skills.
+
+**A deleted category `DESCRIPTION.md` returns on the next sync.** In opt-out mode
+`_seed_category_descriptions` is restricted to the categories of `ESSENTIAL_SKILLS` — only
+`hermes-agent`, whose category directory is `autonomous-ai-agents/` — and it seeds the blurb
+whether or not that skill was itself deferred to an `external_dirs` tree. Deleting
+`skills/autonomous-ai-agents/DESCRIPTION.md` therefore undoes itself at the next sync (observed by
+running `sync_skills` against a copy of the profile under a scratch `HERMES_HOME`: `copied: 0`,
+`skipped_opt_out: True`, file present afterwards). Never report that deletion as durable.
+
+**Deferral and shadow cleanup cover bundled names only.** `_defer_to_external` runs inside the
+walk over the bundled set, so a self-written skill promoted into an `external_dirs` tree keeps its
+local copy — nothing else reconciles it, and removing that copy is a manual step of promotion.
+Verified by deleting one: `skills_list` still returns the skill from the external tree, and its
+category changes from the local directory's to `null`.
