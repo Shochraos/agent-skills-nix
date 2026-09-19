@@ -45,11 +45,9 @@ let
   # hermes reads skills from disk, so those relative paths are correct for its
   # consumer, and rewriting them to `skill://` would fix omp at hermes' expense.
   # Only the imperative-installer class is universal, and it measures zero hits.
-  banned = [
-    "npx skills add"
-    "npx skills init"
-    "npx skills update"
-  ];
+  # The list lives in `pkgs/lib/` because the hermes-managed payload enforces the
+  # same class; two payloads must not drift on a rule they share.
+  banned = (import ../lib/installer-patterns.nix { }).banned;
 in
 lib.throwIf (total != builtins.length names)
   "hermes-skills: two categories share a skill name, so the later copy would win and the earlier skill would disappear from both the payload and the package set: ${toString total} skills collapsed to ${toString (builtins.length names)} names"

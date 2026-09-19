@@ -96,8 +96,14 @@
                 anthropics-skills
                 ;
             };
-            managed-skills = payload "managed" ./pkgs/managed-skills/package.nix {
-              src = ./skills;
+            omp-managed-skills = payload "omp-managed" ./pkgs/omp-managed-skills/package.nix {
+              src = ./skills/omp-managed;
+            };
+            shared-skills = payload "shared" ./pkgs/shared-skills/package.nix {
+              src = ./skills/shared;
+            };
+            hermes-managed-skills = payload "hermes-managed" ./pkgs/hermes-managed-skills/package.nix {
+              src = ./skills/hermes-managed;
             };
             hermes-skills = payload "hermes" ./pkgs/hermes-skills/package.nix {
               inherit (inputs) hermes-agent;
@@ -135,7 +141,10 @@
             skillset-smoke = mkSkillset [
               "superpowers-brainstorming"
               "vendored-nixos"
-              "managed-cloudflare-bypass"
+              "omp-managed-end-of-task-memory-update"
+              "shared-cloudflare-bypass"
+              "hermes-managed-hermes-skill-library-management"
+              "hermes-hermes-agent"
             ];
           };
         }

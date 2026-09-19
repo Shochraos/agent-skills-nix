@@ -1,5 +1,9 @@
-# Gate snippets for the managed payload's aggregate derivation (./package.nix).
-{ lib }:
+# The oh-my-pi gate set: banned patterns in every `*.md`, stricter ones in `SKILL.md`
+# only, and a resolution gate that walks every `skill://` token and fails if it names
+# nothing. Shared by the two payloads whose content oh-my-pi loads — `omp-managed-skills`
+# and `shared-skills` — because a rule two payloads enforce must not drift between them.
+# `name` only labels the failure messages.
+{ lib, name }:
 let
   noTrailingNewline = lib.removeSuffix "\n";
 in
@@ -22,7 +26,7 @@ in
   patternGate = root: include: patterns: ''
     for pattern in ${lib.escapeShellArgs patterns}; do
       if grep -rnE --include=${lib.escapeShellArg include} -- "$pattern" ${root}; then
-        echo "managed-skills: banned pattern '$pattern' present in ${include} at the sites above" >&2
+        echo "${name}: banned pattern '$pattern' present in ${include} at the sites above" >&2
         exit 1
       fi
     done
@@ -34,7 +38,7 @@ in
       unresolved=0
       for target in $(grep -rhoE 'skill://[A-Za-z0-9_./-]+' --include='*.md' ${scanRoot} | sort -u); do
         [ -e "${universeRoot}/''${target#skill://}" ] && continue
-        echo "managed-skills: '$target' resolves to nothing:" >&2
+        echo "${name}: '$target' resolves to nothing:" >&2
         grep -rnF --include='*.md' -- "$target" ${scanRoot} >&2
         unresolved=1
       done
