@@ -87,6 +87,24 @@ them; ask before any `hermes skills opt-in`. Skills provided by `skills.external
 unaffected by the opt-out — if the user wants those gone too, the change belongs in the
 management layer that declares that directory, not in `$HERMES_HOME/skills`.
 
+## 6. Promotion is part of writing a skill, not a follow-up
+
+`skill_manage` writes into `$HERMES_HOME/skills/`, and so does the background curator acting on
+its own: `skills/.curator_ledger.jsonl` records those writes with `"actor": "curator"` and the
+session id, mid-session, with no request behind them. Nothing reconciles that directory —
+`_defer_to_external` covers bundled names only — so a promotion that skips the delete leaves two
+copies that drift (`references/skill-sync-mechanics.md`).
+
+Promotion is the whole sequence, in the same turn: copy the folder to
+`agent-skills-nix/skills/hermes-managed/<name>/` with the directory name equal to the frontmatter
+`name` (the payload build fails otherwise), add a routing bullet for it to
+`nixfiles/assets/harness-rules/hermes/SOUL.md`, delete the local copy, and state that a rebuild is
+required. The payload is a store path, so an unbuilt or uncommitted tree changes nothing at
+runtime. A local-only skill at the end of a turn is a defect to fix, not a question to ask.
+
+`SOUL.md` is approval-protected: if the write is refused, say so and hand the user the exact
+routing bullet to place, rather than leaving the promotion half-done and silently.
+
 ## Related
 
 - `references/skill-sync-mechanics.md` — manifest semantics, marker files, sync entry
