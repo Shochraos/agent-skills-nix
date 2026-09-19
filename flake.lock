@@ -16,6 +16,22 @@
         "type": "github"
       }
     },
+    "hermes-agent": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1789815537,
+        "narHash": "sha256-DTW8do2AR+i8SsNe4tb7a7Cg18l5Tkrwpm4CdBmCzO8=",
+        "owner": "NousResearch",
+        "repo": "hermes-agent",
+        "rev": "7c6f21a5e12ba9b1c674ec9b410fa6b8c45de4f8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NousResearch",
+        "repo": "hermes-agent",
+        "type": "github"
+      }
+    },
     "nixos-skill": {
       "flake": false,
       "locked": {
@@ -67,6 +83,7 @@
     "root": {
       "inputs": {
         "anthropics-skills": "anthropics-skills",
+        "hermes-agent": "hermes-agent",
         "nixos-skill": "nixos-skill",
         "nixpkgs": "nixpkgs",
         "qt-agent-skills": "qt-agent-skills",

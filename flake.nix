@@ -33,6 +33,11 @@
       url = "github:anthropics/skills";
       flake = false;
     };
+
+    hermes-agent = {
+      url = "github:NousResearch/hermes-agent";
+      flake = false;
+    };
   };
 
   outputs =
@@ -45,6 +50,7 @@
       wshobson-agents,
       qt-agent-skills,
       anthropics-skills,
+      hermes-agent,
     }:
     let
       systems = [
@@ -92,6 +98,9 @@
             };
             managed-skills = payload "managed" ./pkgs/managed-skills/package.nix {
               src = ./skills;
+            };
+            hermes-skills = payload "hermes" ./pkgs/hermes-skills/package.nix {
+              inherit (inputs) hermes-agent;
             };
           };
 
