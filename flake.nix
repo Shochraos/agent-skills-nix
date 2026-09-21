@@ -43,6 +43,11 @@
       url = "github:dbosk/claude-skills";
       flake = false;
     };
+
+    paper2agent = {
+      url = "github:jmiao24/Paper2Agent";
+      flake = false;
+    };
   };
 
   outputs =
@@ -57,6 +62,7 @@
       anthropics-skills,
       hermes-agent,
       dbosk-skills,
+      paper2agent,
     }:
     let
       systems = [
@@ -108,6 +114,7 @@
               inherit (inputs)
                 hermes-agent
                 dbosk-skills
+                paper2agent
                 ;
             };
           };

@@ -33,10 +33,7 @@
               let
                 base = baseNameOf path;
               in
-              !(nixpkgs.lib.hasPrefix "result" base)
-              && base != ".git"
-              && base != ".omp"
-              && base != ".direnv";
+              !(nixpkgs.lib.hasPrefix "result" base) && base != ".git" && base != ".omp" && base != ".direnv";
           };
 
           nativeBuildInputs = [

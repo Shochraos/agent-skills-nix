@@ -80,6 +80,22 @@
         "type": "github"
       }
     },
+    "paper2agent": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1789664167,
+        "narHash": "sha256-/OVIznQhNicCbbIlal5F5xwtm3lv4E9t7UYCIB0vK2c=",
+        "owner": "jmiao24",
+        "repo": "Paper2Agent",
+        "rev": "8c2d059165ef8cdcb70dbea76655b9c2b55b38e6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jmiao24",
+        "repo": "Paper2Agent",
+        "type": "github"
+      }
+    },
     "qt-agent-skills": {
       "flake": false,
       "locked": {
@@ -103,6 +119,7 @@
         "hermes-agent": "hermes-agent",
         "nixos-skill": "nixos-skill",
         "nixpkgs": "nixpkgs",
+        "paper2agent": "paper2agent",
         "qt-agent-skills": "qt-agent-skills",
         "superpowers": "superpowers",
         "vercel-skills": "vercel-skills",

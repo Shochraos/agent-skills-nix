@@ -3,6 +3,7 @@
   runCommandLocal,
   hermes-agent,
   dbosk-skills,
+  paper2agent,
 }:
 let
   dirSkills = import ../lib/dir-skills.nix {
@@ -29,6 +30,7 @@ let
 
   vendored = {
     latex-writing = "${dbosk-skills}/latex-writing";
+    paper2agent = "${paper2agent}/skills/paper2agent";
   };
 
   copies = builtins.foldl' (acc: entry: acc // entry) vendored perCategory;
@@ -48,7 +50,7 @@ lib.throwIf (total != builtins.length names)
       runCommandLocal "hermes-skills"
         {
           meta = {
-            description = "Agent skills for hermes: the catalogue bundled with hermes-agent plus one vendored third-party skill, one directory per skill. Copied verbatim, gated only on the imperative-installer patterns; the README records why the oh-my-pi-specific ones are not enforced here.";
+            description = "Agent skills for hermes: the catalogue bundled with hermes-agent plus two vendored third-party skills, one directory per skill, each carrying its upstream licence. Copied verbatim, gated only on the imperative-installer patterns; the README records why the oh-my-pi-specific ones are not enforced here.";
             platforms = lib.platforms.all;
           };
         }
@@ -58,6 +60,7 @@ lib.throwIf (total != builtins.length names)
             lib.mapAttrsToList (name: source: "cp -r ${source} $out/${name}") copies
           )}
           chmod -R u+w $out
+          cp ${paper2agent}/LICENSE $out/paper2agent/LICENSE
 
           for pattern in ${lib.escapeShellArgs banned}; do
             if grep -rnE --include='*.md' -- "$pattern" $out; then
