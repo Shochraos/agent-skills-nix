@@ -1,8 +1,3 @@
-# The oh-my-pi gate set: banned patterns in every `*.md`, stricter ones in `SKILL.md`
-# only, and a resolution gate that walks every `skill://` token and fails if it names
-# nothing. Shared by the two payloads whose content oh-my-pi loads — `omp-managed-skills`
-# and `shared-skills` — because a rule two payloads enforce must not drift between them.
-# `name` only labels the failure messages.
 { lib, name }:
 let
   noTrailingNewline = lib.removeSuffix "\n";

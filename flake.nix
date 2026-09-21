@@ -72,13 +72,6 @@
           pkgs = pkgsFor.${system};
           lib = nixpkgs.lib;
 
-          # Each payload file returns `{ payload; skillNames; }`; `prefix` names its
-          # per-skill packages, and `skillNames` comes from the same data the
-          # payload's build script copies, so the two cannot drift apart.
-          #
-          # `callPackage` wraps a non-derivation result in `makeOverridable`, which
-          # tags on `override`/`overrideDerivation`; strip them so each record is
-          # exactly `{ prefix; payload; skillNames; }` for the consumers below.
           payload =
             prefix: file: args:
             {

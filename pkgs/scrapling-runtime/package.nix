@@ -1,9 +1,3 @@
-# Fully declarative Scrapling MCP runtime: a python packageOverrides scope
-# (mcp 2.x, mcp-types, patchright from the PyPI wheel, scrapling itself, plus
-# two small version bumps scrapling's runtime-deps check enforces) plus
-# nixpkgs Chromium. The wrapper pins the browser (SCRAPLING_EXECUTABLE_PATH)
-# and the node driver binary (PLAYWRIGHT_NODEJS_PATH), so no FHS ELF ever
-# execs and there is no nix-ld, steam-run, or ms-playwright cache involvement.
 {
   lib,
   chromium,
@@ -16,8 +10,6 @@
 let
   python = python3.override {
     packageOverrides = final: prev: {
-      # scrapling 0.4.15 pins cssselect>=1.5.0; nixpkgs has 1.3.0, and 1.5.0
-      # switched its build backend to hatchling.
       cssselect = prev.cssselect.overridePythonAttrs (old: rec {
         version = "1.5.0";
         build-system = [ prev.hatchling ];
@@ -28,8 +20,6 @@ let
         };
       });
 
-      # scrapling 0.4.15 pins curl_cffi>=0.16.1; nixpkgs has 0.16.0.
-      # fetchPypi's wheel URL construction 404s on the multi-platform tag.
       curl-cffi = prev.curl-cffi.overridePythonAttrs (old: rec {
         version = "0.16.2";
         pyproject = null;

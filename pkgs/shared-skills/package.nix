@@ -1,11 +1,3 @@
-# Self-authored skills both agents load, promoted out of oh-my-pi's or hermes-agent's
-# managed directory. Neither agent owns them, so they sit outside the two per-agent trees:
-# oh-my-pi takes this payload whole, hermes selects from it by name.
-#
-# It carries the oh-my-pi gate set — the strictest of its two consumers — so a skill here
-# must be readable by oh-my-pi: no sibling `references/` link, no git writes, and every
-# `skill://` token resolving inside this payload. A skill that only works when read from
-# disk belongs in `hermes-managed/` instead.
 {
   lib,
   runCommandLocal,

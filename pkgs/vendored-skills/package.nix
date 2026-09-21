@@ -16,9 +16,6 @@ let
 
   dirSkills = import ../lib/dir-skills.nix { inherit lib; };
 
-  # Every skill this payload ships, and where it comes from. The build script and
-  # the per-skill package list are both generated from this attrset, so a skill
-  # cannot be copied without being selectable, or selectable without being copied.
   copies = {
     nixos = nixos-skill;
     find-skills = "${vercel-skills}/skills/find-skills";
@@ -36,8 +33,6 @@ let
   // dirSkills "${wshobson-agents}/plugins/python-development/skills"
   // dirSkills "${wshobson-agents}/plugins/shell-scripting/skills";
 
-  # Per-skill edits, applied after the copies: `drop` removes files that exist only
-  # to serve the upstream repository, `rewrites` keys are paths inside the skill.
   edits = {
     nixos.drop = [
       ".github"
@@ -126,8 +121,6 @@ let
     ];
   };
 
-  # A single-file skill carries `file`; everything else is a directory path.
-  # (`lib.isAttrs` alone is true for derivations too, so `file` is the test.)
   copyLine =
     name: source:
     if lib.isAttrs source && source ? file then

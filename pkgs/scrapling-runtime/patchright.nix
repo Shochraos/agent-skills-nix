@@ -1,8 +1,3 @@
-# Upstream note: patchright's GitHub source is NOT the release content — the real
-# package is built by their release workflow, and nixpkgs carries a `broken = true`
-# 1.58 for exactly that reason. The PyPI wheel is the real artifact and embeds the
-# patched driver. The bundled FHS node never execs: the runtime wrapper sets
-# PLAYWRIGHT_NODEJS_PATH to nixpkgs nodejs (honored natively by `_driver.py`).
 {
   lib,
   buildPythonPackage,
@@ -31,7 +26,6 @@ buildPythonPackage rec {
     pyee
   ];
 
-  # Module attempts filesystem writes at import time (same as nixpkgs' playwright note).
   pythonImportsCheck = [ ];
   doCheck = false;
 

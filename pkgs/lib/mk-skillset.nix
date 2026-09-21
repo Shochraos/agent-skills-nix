@@ -1,10 +1,3 @@
-# Join an explicit set of per-skill packages into one skills directory, with the
-# names validated at evaluation time so a typo is an eval error instead of a
-# silently smaller set.
-#
-# symlinkJoin is enough: omp's directory scanner accepts symbolic links as skill
-# entries (`c.isDirectory() || c.isSymbolicLink()`) and stats `<dir>/<name>/SKILL.md`
-# through them.
 { lib, symlinkJoin }:
 available: names:
 let

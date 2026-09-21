@@ -1,5 +1,3 @@
-# Pinned sibling of mcp 2.1.1 (`mcp-types==2.1.1`), not yet in nixpkgs.
-# Plain fetchurl because fetchPypi cannot construct the underscore filename.
 {
   lib,
   buildPythonPackage,

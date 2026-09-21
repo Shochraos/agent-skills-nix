@@ -1,6 +1,3 @@
-# mcp 2.1.1: scrapling imports `mcp.server.MCPServer`, a 2.x-only API;
-# nixpkgs currently ships 1.29.0. New in 2.x: httpx2, mcp-types, pyjwt,
-# python-multipart, typing-inspection, opentelemetry-api, jsonschema.
 {
   lib,
   buildPythonPackage,
@@ -38,7 +35,6 @@ buildPythonPackage rec {
     uv-dynamic-versioning
   ];
 
-  # pyjwt[crypto] flattened to pyjwt + cryptography
   dependencies = [
     anyio
     cryptography

@@ -1,9 +1,3 @@
-# One derivation per skill, sliced out of a gated payload directory.
-#
-# A slice's build input is the payload itself, so building any slice runs the
-# payload's gates, and gates are fail-only: a slice is byte-identical to the
-# matching directory inside the payload, and its runtime closure is only its own
-# store path — never the payload.
 { lib, runCommandLocal }:
 payloads:
 let

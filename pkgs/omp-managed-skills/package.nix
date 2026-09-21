@@ -1,6 +1,3 @@
-# Self-authored skills, promoted from oh-my-pi's `~/.omp/agent/managed-skills/`.
-# Unlike the upstream payloads there is no flake input: the source is this
-# repo's own `skills/` tree, copied verbatim — no sed normalisation, only gates.
 {
   lib,
   runCommandLocal,
