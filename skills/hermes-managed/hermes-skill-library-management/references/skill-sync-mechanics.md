@@ -72,7 +72,9 @@ running `sync_skills` against a copy of the profile under a scratch `HERMES_HOME
 `skipped_opt_out: True`, file present afterwards). Never report that deletion as durable.
 
 **Deferral and shadow cleanup cover bundled names only.** `_defer_to_external` runs inside the
-walk over the bundled set, so a self-written skill promoted into an `external_dirs` tree keeps its
-local copy — nothing else reconciles it, and removing that copy is a manual step of promotion.
-Verified by deleting one: `skills_list` still returns the skill from the external tree, and its
-category changes from the local directory's to `null`.
+walk over the bundled set, so a hand-copied skill sitting in `$HERMES_HOME/skills/` next to its
+copy in an `external_dirs` tree is reconciled by nothing: the two drift, and the local directory
+wins on name. That is the state `skills.create_dir` removes from the workflow — with it pointed at
+the repository tree, `skill_manage` has one destination and no copy ever appears in the profile.
+Verified by deleting a hand-copied directory: `skills_list` still returns the skill from the
+external tree, and its category changes from the local directory's to `null`.

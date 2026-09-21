@@ -38,6 +38,11 @@
       url = "github:NousResearch/hermes-agent";
       flake = false;
     };
+
+    dbosk-skills = {
+      url = "github:dbosk/claude-skills";
+      flake = false;
+    };
   };
 
   outputs =
@@ -51,6 +56,7 @@
       qt-agent-skills,
       anthropics-skills,
       hermes-agent,
+      dbosk-skills,
     }:
     let
       systems = [
@@ -106,7 +112,10 @@
               src = ./skills/hermes-managed;
             };
             hermes-skills = payload "hermes" ./pkgs/hermes-skills/package.nix {
-              inherit (inputs) hermes-agent;
+              inherit (inputs)
+                hermes-agent
+                dbosk-skills
+                ;
             };
           };
 

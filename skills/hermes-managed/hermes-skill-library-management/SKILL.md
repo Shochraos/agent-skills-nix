@@ -87,23 +87,27 @@ them; ask before any `hermes skills opt-in`. Skills provided by `skills.external
 unaffected by the opt-out — if the user wants those gone too, the change belongs in the
 management layer that declares that directory, not in `$HERMES_HOME/skills`.
 
-## 6. Promotion is part of writing a skill, not a follow-up
+## 6. Skills are written into the skills repository, not a staging directory
 
-`skill_manage` writes into `$HERMES_HOME/skills/`, and so does the background curator acting on
-its own: `skills/.curator_ledger.jsonl` records those writes with `"actor": "curator"` and the
-session id, mid-session, with no request behind them. Nothing reconciles that directory —
-`_defer_to_external` covers bundled names only — so a promotion that skips the delete leaves two
-copies that drift (`references/skill-sync-mechanics.md`).
+`skill_manage` creates and edits skills under `skills.create_dir`, which this profile points at
+`agent-skills-nix/skills/hermes-managed/<name>/` — the tree the installed payload is built from.
+The background curator acts through the same tool and lands in the same place
+(`skills/.curator_ledger.jsonl` records those writes with `"actor": "curator"` and the session id,
+mid-session, with no request behind them), so nothing accumulates in `$HERMES_HOME/skills/` and
+there is no copy to move or delete afterwards. Keep each skill at the top level of that tree: one
+directory per skill, no category, the directory name equal to the frontmatter `name`, or the
+payload build fails.
 
-Promotion is the whole sequence, in the same turn: copy the folder to
-`agent-skills-nix/skills/hermes-managed/<name>/` with the directory name equal to the frontmatter
-`name` (the payload build fails otherwise), add a routing bullet for it to
-`nixfiles/assets/harness-rules/hermes/SOUL.md`, delete the local copy, and state that a rebuild is
-required. The payload is a store path, so an unbuilt or uncommitted tree changes nothing at
-runtime. A local-only skill at the end of a turn is a defect to fix, not a question to ask.
+Two things belong to the same turn as the write. Add the routing bullet to
+`nixfiles/assets/harness-rules/hermes/SOUL.md`, because nixfiles' build compares that list against
+the installed payloads in both directions and fails on either mismatch. And state that a rebuild is
+required: the payload is a store path built from the repository's locked revision, so an
+uncommitted tree changes nothing at runtime. The checkout sits on Hermes' own search path ahead of
+the payloads, so the skill is readable immediately; the rebuild is what makes it survive a fresh
+`$HERMES_HOME`.
 
 `SOUL.md` is approval-protected: if the write is refused, say so and hand the user the exact
-routing bullet to place, rather than leaving the promotion half-done and silently.
+routing bullet to place, rather than leaving the turn half-done and silently.
 
 ## Related
 

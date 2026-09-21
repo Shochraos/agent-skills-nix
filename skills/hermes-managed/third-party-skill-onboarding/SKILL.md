@@ -79,9 +79,9 @@ is a conflict, not a pass.
 ## 5. Installing is the user's decision
 
 An empty `$HERMES_HOME/skills` is often the intended state in this profile; installing into it
-is a user decision, so show what would be installed and ask. Skills this profile owns are
-promoted into the user's skills repository immediately and without asking, never left as a
-local-only copy (`hermes-skill-library-management` has the mechanics).
+is a user decision, so show what would be installed and ask. Skills this profile owns are written
+into the user's skills repository immediately and without asking, never left as a local-only copy
+(`hermes-skill-library-management` has the mechanics).
 
 ## Related
 

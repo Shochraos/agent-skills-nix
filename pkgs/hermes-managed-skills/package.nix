@@ -1,13 +1,3 @@
-# Skills hermes-agent wrote for itself, promoted out of `~/.hermes/skills/`.
-# No upstream input: the source is this repo's own `hermes-managed/` tree, copied
-# verbatim.
-#
-# The gates are the hermes-side ones rather than the oh-my-pi payload's. That payload
-# encodes oh-my-pi's constraints — `skill://` references, no `..` traversal, no
-# git writes — while hermes reads skills from disk and has no `skill://` scheme,
-# so a sibling relative path is its idiom and the resolution gate would check
-# nothing. What is enforced instead is the invariant the routing index rests on:
-# every directory is a skill, and its frontmatter name equals the directory name.
 {
   lib,
   runCommandLocal,

@@ -2,6 +2,7 @@
   lib,
   runCommandLocal,
   hermes-agent,
+  dbosk-skills,
 }:
 let
   dirSkills = import ../lib/dir-skills.nix {
@@ -9,8 +10,6 @@ let
     ignore = [ "DESCRIPTION.md" ];
   };
 
-  # `skills/` itself also holds AGENTS.md and index-cache, so the walk starts one
-  # level down, at the categories.
   categories = [
     "apple"
     "autonomous-ai-agents"
@@ -28,25 +27,18 @@ let
 
   perCategory = map (category: dirSkills "${hermes-agent}/skills/${category}") categories;
 
-  copies = builtins.foldl' (acc: entry: acc // entry) { } perCategory;
+  vendored = {
+    latex-writing = "${dbosk-skills}/latex-writing";
+  };
 
-  total = builtins.foldl' (
-    count: entry: count + builtins.length (builtins.attrNames entry)
-  ) 0 perCategory;
+  copies = builtins.foldl' (acc: entry: acc // entry) vendored perCategory;
 
-  # Two categories sharing a skill name would make the later copy win, and the
-  # per-skill package list is derived from this same attrset, so the lost skill
-  # would vanish from both the payload and the package set with nothing failing.
+  total = builtins.foldl' (count: entry: count + builtins.length (builtins.attrNames entry)) 0 (
+    perCategory ++ [ vendored ]
+  );
+
   names = builtins.attrNames copies;
 
-  # Deliberately narrower than vendored-skills' gate set, and measured rather
-  # than assumed: over the skills consumers select, `git commit`, `git push`,
-  # `git add` and sibling `references/` paths appear only in hermes' own idiom.
-  # hermes reads skills from disk, so those relative paths are correct for its
-  # consumer, and rewriting them to `skill://` would fix omp at hermes' expense.
-  # Only the imperative-installer class is universal, and it measures zero hits.
-  # The list lives in `pkgs/lib/` because the hermes-managed payload enforces the
-  # same class; two payloads must not drift on a rule they share.
   banned = (import ../lib/installer-patterns.nix { }).banned;
 in
 lib.throwIf (total != builtins.length names)
@@ -56,7 +48,7 @@ lib.throwIf (total != builtins.length names)
       runCommandLocal "hermes-skills"
         {
           meta = {
-            description = "Agent skills bundled with hermes-agent, one directory per skill. Copied verbatim; see the gate comment in package.nix for why the sibling-path and git patterns are not enforced.";
+            description = "Agent skills for hermes: the catalogue bundled with hermes-agent plus one vendored third-party skill, one directory per skill. Copied verbatim, gated only on the imperative-installer patterns; the README records why the oh-my-pi-specific ones are not enforced here.";
             platforms = lib.platforms.all;
           };
         }

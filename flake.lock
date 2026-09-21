@@ -16,6 +16,22 @@
         "type": "github"
       }
     },
+    "dbosk-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1789979142,
+        "narHash": "sha256-JjLM54sFkYu2tZXd/lXUoDGLOJSovb6qtkJ8FmPkhH8=",
+        "owner": "dbosk",
+        "repo": "claude-skills",
+        "rev": "59971ce8dc0bd14486218e4bc5af3ec3359a8593",
+        "type": "github"
+      },
+      "original": {
+        "owner": "dbosk",
+        "repo": "claude-skills",
+        "type": "github"
+      }
+    },
     "hermes-agent": {
       "flake": false,
       "locked": {
@@ -83,6 +99,7 @@
     "root": {
       "inputs": {
         "anthropics-skills": "anthropics-skills",
+        "dbosk-skills": "dbosk-skills",
         "hermes-agent": "hermes-agent",
         "nixos-skill": "nixos-skill",
         "nixpkgs": "nixpkgs",
