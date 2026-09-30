@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
 
 jobs:
   update:
@@ -18,8 +19,10 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@v31
 
-      - name: Update the nine skill-source inputs
-        run: nix flake update superpowers nixos-skill vercel-skills wshobson-agents qt-agent-skills anthropics-skills hermes-agent dbosk-skills paper2agent
+      - name: Update the skill-source inputs
+        run: |
+          mapfile -t inputs < <(nix flake metadata --json | jq -r '.locks.nodes.root.inputs | keys[] | select(. != "nixpkgs")')
+          nix flake update "${inputs[@]}"
 
       - name: Build every skill payload through the gates
         run: nix flake check --print-build-logs
@@ -35,3 +38,18 @@ jobs:
             git commit -m "bump skill sources"
             git push
           fi
+
+      - name: Open an issue when the run fails
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = "[CI] weekly skill update failed";
+            const body = `Run ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId} failed; the lock bump was not pushed. Fix the needle or gate upstream-side, or hold the rev.`;
+            const open = await github.paginate(github.rest.issues.listForRepo, { ...context.repo, state: "open" });
+            const existing = open.find(i => i.title === title);
+            if (existing) {
+              await github.rest.issues.createComment({ ...context.repo, issue_number: existing.number, body });
+            } else {
+              await github.rest.issues.create({ ...context.repo, title, body });
+            }
