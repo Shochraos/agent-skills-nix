@@ -25,7 +25,6 @@ let
     "software-development"
     "web"
   ];
-
   perCategory = map (category: dirSkills "${hermes-agent}/skills/${category}") categories;
 
   vendored = {
@@ -33,11 +32,19 @@ let
     paper2agent = "${paper2agent}/skills/paper2agent";
   };
 
-  copies = builtins.foldl' (acc: entry: acc // entry) vendored perCategory;
+  optionalSkills = {
+    honcho = "${hermes-agent}/optional-skills/autonomous-ai-agents/honcho";
+    scrapling = "${hermes-agent}/optional-skills/research/scrapling";
+    rss-feeds = "${hermes-agent}/optional-skills/research/rss-feeds";
+    research-paper-writing = "${hermes-agent}/optional-skills/research/research-paper-writing";
+  };
 
-  total = builtins.foldl' (count: entry: count + builtins.length (builtins.attrNames entry)) 0 (
-    perCategory ++ [ vendored ]
-  );
+  copies = builtins.foldl' (acc: entry: acc // entry) (vendored // optionalSkills) perCategory;
+
+  total =
+    builtins.foldl' (count: entry: count + builtins.length (builtins.attrNames entry)) 0 (
+      perCategory ++ [ vendored optionalSkills ]
+    );
 
   names = builtins.attrNames copies;
 
