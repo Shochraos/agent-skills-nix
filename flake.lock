@@ -3,11 +3,11 @@
     "anthropics-skills": {
       "flake": false,
       "locked": {
-        "lastModified": 1790266835,
-        "narHash": "sha256-xUs7UX8pOcZwR0okaSbI/f8EE5F4Zi/BUd+nIZNafPc=",
+        "lastModified": 1790648403,
+        "narHash": "sha256-PRBkTEGNwT73EFCvuTprzIBGiG+UGSYiaCkY7Ji13us=",
         "owner": "anthropics",
         "repo": "skills",
-        "rev": "33375500bcea98d610eb30ce10ac4e59b89c390d",
+        "rev": "8a1541c4a3ffa5a20a5a91de0dcf3f0bab1d1ef4",
         "type": "github"
       },
       "original": {
@@ -35,11 +35,11 @@
     "hermes-agent": {
       "flake": false,
       "locked": {
-        "lastModified": 1790518828,
-        "narHash": "sha256-ioUpWv1T+cJw6yZazcjmQQlHZSWxXZmQWUFJ7lWTe5Y=",
+        "lastModified": 1791204748,
+        "narHash": "sha256-uOQhWP5MJzSBOZof+/DQ3Wrz4wHuBHDzRP6EDyxR9Jw=",
         "owner": "NousResearch",
         "repo": "hermes-agent",
-        "rev": "8c9fe964009096e46f44292d036c1e0ac33c3026",
+        "rev": "e473f5a9c976a0b5bc292aa415dae28c638a47c3",
         "type": "github"
       },
       "original": {
@@ -51,11 +51,11 @@
     "nixos-skill": {
       "flake": false,
       "locked": {
-        "lastModified": 1790490245,
-        "narHash": "sha256-ICCLiABClSLved/kP/2gl+MiBf14WqSt81i2xsb2gnQ=",
+        "lastModified": 1791114960,
+        "narHash": "sha256-cgeRdM8tiKsHDUjvJRPCQ2jBZDKBFjVrj4t9YORpBPE=",
         "owner": "marceloeatworld",
         "repo": "nixos-ai-skill",
-        "rev": "0c4c714ae878faf8eabc22b8b48e20fd24955cea",
+        "rev": "f4ea0f0a23407e36093e3c215c57167a7373cc2e",
         "type": "github"
       },
       "original": {
@@ -99,11 +99,11 @@
     "qt-agent-skills": {
       "flake": false,
       "locked": {
-        "lastModified": 1783603773,
-        "narHash": "sha256-YHWVYn3m2dYV/brBlYn6nuxVV810+B4geKqfwiJuOHU=",
+        "lastModified": 1790685970,
+        "narHash": "sha256-yWIub29OXCM6GdWsEn6nKqzDHpcZ77eBd1fk6p3vljw=",
         "owner": "TheQtCompanyRnD",
         "repo": "agent-skills",
-        "rev": "71d6c10da78b9a764468ae11c86ab3bc4ca4921f",
+        "rev": "4b3374472ebdaddb1585e6667441baf7028076ee",
         "type": "github"
       },
       "original": {
@@ -145,11 +145,11 @@
     "vercel-skills": {
       "flake": false,
       "locked": {
-        "lastModified": 1789657217,
-        "narHash": "sha256-/B2el3+KYXohGCM4JaHl2EUx1c6mlYdUNrWiE0z/7lA=",
+        "lastModified": 1790958354,
+        "narHash": "sha256-FJLz/HfqBWtsJUuKs0w/OmErdyUi5/fKdNiTBpDtT1A=",
         "owner": "vercel-labs",
         "repo": "skills",
-        "rev": "7407f3893ad4dceab546ac002c3ef806e4000c73",
+        "rev": "18f96ea131dab3b0fcc9b27cf7c6f6cbb6174680",
         "type": "github"
       },
       "original": {
@@ -161,11 +161,11 @@
     "wshobson-agents": {
       "flake": false,
       "locked": {
-        "lastModified": 1790452455,
-        "narHash": "sha256-8h5zbwUAujgruqYZLErWewRX2bmJ5MvkhDqe3J4viNI=",
+        "lastModified": 1791146571,
+        "narHash": "sha256-vKawxqxGv0QygVztpMai7h4SXtK2JmmLEqCZ8hFr+qE=",
         "owner": "wshobson",
         "repo": "agents",
-        "rev": "9b15b34b0bfc13a815cbfc2366e14ea549e09422",
+        "rev": "46891e7e60da0e52baf1050b7b6391b64e84c6d9",
         "type": "github"
       },
       "original": {
