@@ -4,11 +4,6 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
-    superpowers = {
-      url = "github:obra/superpowers";
-      flake = false;
-    };
-
     nixos-skill = {
       url = "github:marceloeatworld/nixos-ai-skill";
       flake = false;
@@ -54,7 +49,6 @@
     inputs@{
       self,
       nixpkgs,
-      superpowers,
       nixos-skill,
       vercel-skills,
       wshobson-agents,
@@ -89,9 +83,6 @@
             ];
 
           payloads = {
-            superpowers-skills = payload "superpowers" ./pkgs/superpowers-skills/package.nix {
-              src = superpowers;
-            };
             vendored-skills = payload "vendored" ./pkgs/vendored-skills/package.nix {
               inherit (inputs)
                 nixos-skill
@@ -142,7 +133,6 @@
 
           checks = packages // {
             skillset-smoke = mkSkillset [
-              "superpowers-brainstorming"
               "vendored-nixos"
               "shared-cloudflare-bypass"
               "hermes-hermes-agent"

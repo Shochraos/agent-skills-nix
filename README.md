@@ -8,20 +8,18 @@ The agent skills behind [nixfiles](https://github.com/Shochraos/nixfiles), packa
 
 | Package | Upstream source | Skills | Per-skill attributes |
 | --- | --- | --- | --- |
-| `superpowers-skills` | [obra/superpowers](https://github.com/obra/superpowers) | 12 | `superpowers-<skill-name>` |
 | `vendored-skills` | [marceloeatworld/nixos-ai-skill](https://github.com/marceloeatworld/nixos-ai-skill), [TheQtCompanyRnD/agent-skills](https://github.com/TheQtCompanyRnD/agent-skills), [vercel-labs/skills](https://github.com/vercel-labs/skills), [wshobson/agents](https://github.com/wshobson/agents), [anthropics/skills](https://github.com/anthropics/skills), one file from [github/awesome-copilot](https://github.com/github/awesome-copilot) | 29 | `vendored-<skill-name>` |
 | `shared-skills` | self-authored — read by both agents, source lives in this repo's `skills/shared/` tree | 1 | `shared-<skill-name>` |
-| `hermes-skills` | [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent), one skill from [dbosk/claude-skills](https://github.com/dbosk/claude-skills) and one from [jmiao24/Paper2Agent](https://github.com/jmiao24/Paper2Agent) | 60 | `hermes-<skill-name>` |
+| `hermes-skills` | [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent), one skill from [dbosk/claude-skills](https://github.com/dbosk/claude-skills) and one from [jmiao24/Paper2Agent](https://github.com/jmiao24/Paper2Agent) | 64 | `hermes-<skill-name>` |
 
-The four payloads are deliberately separate derivations — needle edits, `sed` rewrites and verbatim copies respectively, with the hermes-side payload gated more narrowly on purpose — sharing only the `package.nix` shape, the gate snippets the two oh-my-pi-side payloads run (`pkgs/lib/skill-gates.nix`) and the installer-pattern list the hermes-side one refuses (`pkgs/lib/installer-patterns.nix`). Every skill is also packaged on its own, as `packages.<system>.<source>-<skill-name>`: 107 attributes in total, so a consumer installs exactly the skills it wants instead of a whole payload. Each of those is one directory copied out of its gated payload, so it is byte-identical to that skill inside the aggregate and its closure is only its own store path.
+The three payloads are deliberately separate derivations — `sed` rewrites for the vendored payload, verbatim copies for the other two, with the hermes-side payload gated more narrowly on purpose — sharing only the `package.nix` shape, the gate snippets the two oh-my-pi-side payloads run (`pkgs/lib/skill-gates.nix`) and the installer-pattern list the hermes-side one refuses (`pkgs/lib/installer-patterns.nix`). Every skill is also packaged on its own, as `packages.<system>.<source>-<skill-name>`: 98 attributes in total, so a consumer installs exactly the skills it wants instead of a whole payload. Each of those is one directory copied out of its gated payload, so it is byte-identical to that skill inside the aggregate and its closure is only its own store path.
 
 There is no `default` package — `nix build` always names an attribute.
 
-`scrapling-runtime` is the fifth package, deliberately not a payload: it is not a skills directory, so it has no per-skill attributes. It builds a python package set (scrapling 0.4.15, mcp 2.x, patchright from the PyPI wheel — the GitHub source is not the release content) on top of nixpkgs Chromium. Its `bin/scrapling-mcp` wrapper pins the browser (`SCRAPLING_EXECUTABLE_PATH`) and the node driver binary (`PLAYWRIGHT_NODEJS_PATH`), so no FHS-linked binary ever execs: no pip venv, no browser cache, no nix-ld, no steam-run.
+`scrapling-runtime` is the fourth package, deliberately not a payload: it is not a skills directory, so it has no per-skill attributes. It builds a python package set (scrapling 0.4.15, mcp 2.x, patchright from the PyPI wheel — the GitHub source is not the release content) on top of nixpkgs Chromium. Its `bin/scrapling-mcp` wrapper pins the browser (`SCRAPLING_EXECUTABLE_PATH`) and the node driver binary (`PLAYWRIGHT_NODEJS_PATH`), so no FHS-linked binary ever execs: no pip venv, no browser cache, no nix-ld, no steam-run.
 
 ## How it works
 
-- `superpowers-skills` edits upstream with literal `--replace-fail` needles (upstream rewording one of them is a build error, not silent rot) and ends with a banned-pattern gate that greps the payload for content that must never reach an agent (git write commands, hand-rolled install instructions, disabled-skill handoffs).
 - `vendored-skills` edits a fast-moving upstream with `sed` rewrites (a literal needle would break on every daily doc refresh) and runs three gates: banned patterns in `*.md`, stricter banned patterns in `SKILL.md` only, and a resolution gate that walks every `skill://` token in the payload and fails if it does not name a skill that exists. Its copies and its per-skill edits are evaluation-visible data, and both the build script and the per-skill package list are generated from it, so a skill cannot be copied without becoming selectable, or selectable without being copied.
 - `shared-skills` copies the `skills/shared/` tree verbatim and runs the oh-my-pi gate set, because oh-my-pi is the stricter of its two readers: no sibling `references/` link, no git writes, and every `skill://` token must resolve inside the payload. Its skill so far is `cloudflare-bypass`, which oh-my-pi routes to for blocked or JS-only fetches and hermes lists among its external dirs.
 - `hermes-skills` copies hermes' bundled catalogue and two vendored third-party skills verbatim and runs one gate: the imperative-installer patterns (`npx skills add|init|update`). Its gate set is narrower than the others for a measured reason. The `git` patterns and the sibling-`references/` rule encode oh-my-pi's constraints — omp rejects `..` traversal in `skill://` and forbids git writes — while hermes reads skills from disk, where a relative `references/` path is correct. Eight of the skills consumers select carry such paths, so enforcing the rule here would rewrite upstream content into a form its own consumer cannot follow.
@@ -53,7 +51,6 @@ Add the input and install the payload directories as oh-my-pi `skills.customDire
 { inputs, pkgs, ... }:
 {
   skills.customDirectories = [
-    "${inputs.agent-skills-nix.packages.${pkgs.stdenv.hostPlatform.system}.superpowers-skills}"
     "${inputs.agent-skills-nix.packages.${pkgs.stdenv.hostPlatform.system}.vendored-skills}"
     "${inputs.agent-skills-nix.packages.${pkgs.stdenv.hostPlatform.system}.shared-skills}"
   ];
@@ -65,10 +62,9 @@ Individual skills install the same way — one `customDirectories` entry, or one
 ```nix
 skills.customDirectories = [
   "${inputs.agent-skills-nix.lib.${pkgs.stdenv.hostPlatform.system}.mkSkillset [
-    "superpowers-brainstorming"
-    "superpowers-writing-plans"
-    "superpowers-executing-plans"
     "vendored-nixos"
+    "vendored-uv-package-manager"
+    "shared-cloudflare-bypass"
   ]}"
 ];
 ```
@@ -77,7 +73,7 @@ skills.customDirectories = [
 
 A hermes-agent install consumes skills through its own `skills.external_dirs` instead, and a payload directory is a valid entry there. nixfiles points that at a `mkSkillset` selection, and its build requires a routing bullet for every name under those external dirs in `assets/harness-rules/hermes/SOUL.md`, failing without it, so a new skill lands as a change in both repositories. Skills under `skills/shared/` reach hermes the same way, selected by name from the `shared-skills` payload.
 
-Selecting a skill on its own leaves any reference it makes to a sibling skill (`skill://<name>`, or `superpowers:<name>`) pointing at a skill you did not install: the resolution gate checks the payload, not your selection. Pick related skills together.
+Selecting a skill on its own leaves any reference it makes to a sibling skill (`skill://<name>`) pointing at a skill you did not install: the resolution gate checks the payload, not your selection. Pick related skills together.
 
 The Scrapling runtime wires into oh-my-pi's `mcp.json` (this is what nixfiles' ai aspect does):
 
@@ -101,7 +97,6 @@ pkgs/lib/slices.nix                   one derivation per skill, sliced from its 
 pkgs/lib/mk-skillset.nix              the lib.<system>.mkSkillset selection helper
 pkgs/lib/skill-gates.nix              the oh-my-pi gate set, run by both oh-my-pi-side payloads
 pkgs/lib/installer-patterns.nix       the installer patterns the hermes payload refuses
-pkgs/superpowers-skills/package.nix   the needle-edited payload
 pkgs/vendored-skills/package.nix      the sed-edited payload
 pkgs/shared-skills/package.nix        the verbatim payload both agents read
 pkgs/hermes-skills/package.nix        hermes' bundled catalogue plus two vendored skills, copied verbatim
